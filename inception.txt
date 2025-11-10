@@ -1,0 +1,80 @@
+
+
+==========DOCKERFILE NGINX===========
+
+RUN openssl req -x509 -nodes
+
+req > lance la creation d'une requete de certificat
+
+-x509 > demande a openssl de generer un certificat auto-signe
+
+-nodes > <<No DES>> indique de ne pas chiffrer la cle privee avec un mdp (comme ca nginx peut l'utiliser tout seul comme un grand)
+
+-out /etc/nginx/ssl/certificate.crt
+> emplacement ou sera enregistre le certificat public
+
+-keyout /etc/nginx/ssl/certificate.key
+> emplacement pour la cle privee
+
+
+RUN mkdir -p /var/run/nginx
+> dossier pour fichiers temporaire nginx
+
+
+CMD ["nginx", "-g", "daemon off;"]
+> empeche nginx de se mettre en mode daemon(le processus principal se termineriat et Nginx passerait en tache de fond, Docker penserait que le travail est fini et arreterait le conteneur). Il devient le PID 1 du conteneur ce qui lui permet de rester "vivant.
+
+
+-subj "/C=FR/ST=NA/L=Angouleme/O=42/OU=42/CN=$DOMAIN_NAME/UID=sabartho"
+> fournit les infos du certificat
+/C=	Country (pays)	FR
+/ST=	State/Province (région)	NA
+/L=	Locality (ville)	Angouleme
+/O=	Organization	42
+/OU=	Organizational Unit	42
+/CN=	Common Name (nom de domaine du certificat)	$DOMAIN_NAME (ex: example.com)
+/UID=	Identifiant utilisateur lguiet
+
+==========fichier config nginx===============
+
+server{}
+> defini un serveur virtuel
+
+listen 443 ssl
+>indique a nginx qu'il doit ecouter sur le port 443 (port standard https) et ssl = protocole SSL/TLS (securise0
+sans ces mots cles nginx accepterait toutes connexions http (non chiffrees)
+
+server_name $DOMAIN_NAME www.$DOMAIN_NAME;
+>defini les noms de domaine associes a ce serveur virtuel. Cela permet de répondre à :
+https://example.com
+et
+https://www.example.com
+Si une requête arrive sur un autre domaine → Nginx ne l’associe pas à ce bloc.
+
+root    /var/www/html/;
+> definit un repo racine des fichiers web (la ou se trouvera notre site). Ex: une requete /index.php cherchera le fichier la.
+
+index index.php;
+> defini le fichier d'index par defaut a servir quand un suer accede a un dossier. Ex: https://example.com/ → Nginx renverra /var/www/html/index.php
+
+
+ssl_certificate     /etc/nginx/ssl/certificate.crt;
+ssl_certificate_key /etc/nginx/ssl/certificate.key;
+> chemins vers certificat ssl et cle privee du certificat
+
+ssl_protocols       TLSv1.2 TLSv1.3;
+> specifie les versions TLS autorisees (versions modernes et secu)
+
+ssl_session_timeout 10m;
+>Quand un client se connecte a un site HTTPS il doit etablir une session securisee avec le serveur (le "handshake"). Durant ce processus le client et le serveur echangent des infos et notamment le certificat (le serveur l'envoie et le client le verifie). Les deux parties generent une cle de session partagee pour chiffrer la communication.
+La session permet d'eviter de refaire tout le processus de handshake a chaque nouvelle connexion. Donc ici on demande qu'on va conservr les sessions SSL en cache pdt 10min.
+
+
+
+
+
+
+
+
+
+
