@@ -66,13 +66,39 @@ ssl_protocols       TLSv1.2 TLSv1.3;
 > specifie les versions TLS autorisees (versions modernes et secu)
 
 ssl_session_timeout 10m;
->Quand un client se connecte a un site HTTPS il doit etablir une session securisee avec le serveur (le "handshake"). Durant ce processus le client et le serveur echangent des infos et notamment le certificat (le serveur l'envoie et le client le verifie). Les deux parties generent une cle de session partagee pour chiffrer la communication.
+> Quand un client se connecte a un site HTTPS il doit etablir une session securisee avec le serveur (le "handshake"). Durant ce processus le client et le serveur echangent des infos et notamment le certificat (le serveur l'envoie et le client le verifie). Les deux parties generent une cle de session partagee pour chiffrer la communication.
 La session permet d'eviter de refaire tout le processus de handshake a chaque nouvelle connexion. Donc ici on demande qu'on va conservr les sessions SSL en cache pdt 10min.
 
+keepalive_timeout 70;
+> garde connexion tcp active ouverte pdt 70secondes apres derniere requete (reduit la latence)
+
+location ~ \.php$ {
+> defini que ce bloque s'appliquera a toutes les requetes dont le nom de fichier se termine par .php
+> "~" signifie que la directive utilise une expression reguliere (regex).
+
+fastcgi_split_path_info ^(.+\.php)(/.+)$;
+> separe l'URL en deux parties : la partie script PHP ($fastcgi_script_name), la partie path info ($fastcgi_path_info)
+Ex: pour une requete : /index.php/test/
+-> $fastcgi_script_name = /index.php
+-> $fastcgi_path_info = /test/
+
+fastcgi_pass wordpress:9000;
+> Indique a nginx ou envoyer la requete PHP. La requete sera transmise a un service FASTCGI qui ecoute sur le port 9000 du container "wordpress"
+
+fastcgi_index index.php;
+>defini le fichier d'index par defaut a utiliser quand une requete pointe vers un repertoire
+-> si on demande /blog/ Nginx recherchera /blog/index.php
 
 
 
 
+
+cmds
+
+docker build -t my_image .
+docker rmi my_image
+docker stop container_id
+docker run -p 443:443 --name nginx my_image
 
 
 
