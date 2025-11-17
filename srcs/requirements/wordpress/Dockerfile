@@ -43,4 +43,4 @@ RUN chmod u+x /usr/local/bin/setup.sh
 
 ENTRYPOINT ["/usr/local/bin/setup.sh"]
 #Php-fpm will stay in foreground (PID 1)
-CMD ["/usr/sbin/php-fpm7.4", "--nodaemon"]
+CMD ["/usr/sbin/php-fpm7.4", "-F"]

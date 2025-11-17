@@ -9,8 +9,8 @@ mkdir -p /etc/nginx/nginx
 ## Generate SSL Certificate only if it's not existing
 if [ ! -f /etc/nginx/ssl/nginx.crt ]; then
     openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-        -keyout /etc/nginx/ssl/nginx.key \
-        -out /etc/nginx/ssl/nginx.crt \
+        -keyout /etc/nginx/ssl/lguiet.42.fr.key \
+        -out /etc/nginx/ssl/lguiet.42.fr.crt \
         -subj "/C=FR/ST=France/L=Angouleme/O=42School/OU=student/CN=$DOMAIN_NAME"
 fi
 

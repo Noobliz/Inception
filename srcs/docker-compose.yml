@@ -1,6 +1,4 @@
-version: '3.7'
 
-# Les services de votre infrastructure
 services:
 
 ### 1. MariaDB Service (Base de données)
@@ -8,28 +6,25 @@ services:
     build:
       context: ./requirements/mariadb # Chemin vers le Dockerfile de MariaDB
       dockerfile: Dockerfile
-    image: mariadb # Nom de l'image = Nom du service (Contrainte respectée)
+    image: mariadb # Nom de l'image = Nom du service
     container_name: mariadb
     env_file: .env # Utilisation des variables d'environnement
     secrets:
       - db_root_password_file
       - db_admin_password_file
       - db_user_password_file
-    restart: always # Redémarrage automatique en cas de crash (Contrainte respectée)
+    restart: always # Redémarrage automatique
     networks:
       - inception_net
     volumes:
-      # Volume BIND MOUNT obligatoire pour la persistance des données DB sur l'hôte
-      - type: bind
-        source: /home/lisux/data/mariadb
-        target: /var/lib/mysql
+      - /home/lguiet/data/mariadb:/var/lib/mysql
 
 ### 2. WordPress Service (PHP-FPM)
   wordpress:
     build:
-      context: ./requirements/wordpress # Chemin vers le Dockerfile de WordPress
+      context: ./requirements/wordpress
       dockerfile: Dockerfile
-    image: wordpress # Nom de l'image = Nom du service
+    image: wordpress
     container_name: wordpress
     env_file: .env
     secrets:
@@ -38,52 +33,37 @@ services:
     restart: always
     networks:
       - inception_net
-    # Dépendance explicite: MariaDB doit démarrer avant WordPress
     depends_on:
       - mariadb
     volumes:
-      # Volume BIND MOUNT obligatoire pour la persistance des fichiers du site sur l'hôte
-      - type: bind
-        source: /home/lisux/data/wordpress
-        target: /var/www/html/wordpress
-      # Volume partagé pour le socket UNIX NGINX/PHP-FPM
-      - nginx_php_socket:/var/www/sockets/
+      - /home/lguiet/data/wordpress:/var/www/html/wordpress
+
 
 ### 3. NGINX Service (Point d'entrée sécurisé)
   nginx:
     build:
-      context: ./requirements/nginx # Chemin vers le Dockerfile de NGINX
+      context: ./requirements/nginx
       dockerfile: Dockerfile
-    image: nginx # Nom de l'image = Nom du service
+    image: nginx
     container_name: nginx
     env_file: .env
     restart: always
     networks:
       - inception_net
-    # Le seul port exposé est le 443 (HTTPS) - Contrainte respectée
     ports:
       - "443:443"
-    # Dépendance explicite: WordPress doit démarrer avant NGINX
     depends_on:
       - wordpress
     volumes:
-      # Volume partagé pour le socket UNIX NGINX/PHP-FPM
-      - nginx_php_socket:/var/www/sockets/
-      # Copie des fichiers statiques (certificats, configs)
-      - ./srcs/requirements/nginx/conf/lisux.42.fr.key:/etc/nginx/ssl/lisux.42.fr.key:ro
-      - ./srcs/requirements/nginx/conf/lisux.42.fr.crt:/etc/nginx/ssl/lisux.42.fr.crt:ro
+      - ./requirements/nginx/conf/:/etc/nginx/ssl/:rw
 
-# Définition des volumes et du réseau
-volumes:
-  # Volume pour le socket UNIX, qui ne nécessite pas de persistance sur l'hôte
-  nginx_php_socket:
-
+# Définition des volumes nommés
+volumes: {}
 networks:
   inception_net:
-    driver: bridge # Réseau Docker dédié (Contrainte respectée)
+    driver: bridge # Réseau Docker dédié
 
 secrets:
-  # Définitions des 3 secrets
   db_root_password_file:
     file: ./secrets/mysql_root_password.txt
   db_user_password_file:

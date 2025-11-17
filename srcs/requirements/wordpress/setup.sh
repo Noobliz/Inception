@@ -3,7 +3,6 @@
 ## Import secrets
 MYSQL_PASSWORD=$(< /run/secrets/db_user_password_file)
 MYSQL_ADMIN_PASSWORD=$(< /run/secrets/db_admin_password_file)
-MYSQL_ROOT_PASSWORD=$(< /run/secrets/db_root_password_file)
 
 
 # Chemin vers le dossier WordPress
@@ -43,5 +42,6 @@ EOF
     echo "--- Fichier wp-config.php créé ---"
 fi
 
+echo "--- Tentative de test de la configuration PHP-FPM ---"
 # Lance le service PHP-FPM en avant-plan (PID 1) et remplace le processus du shell
 exec "$@"
