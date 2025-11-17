@@ -20,9 +20,8 @@ RUN apt-get update -y && apt-get install -y \
         php7.4-zip \
     && rm -rf /var/lib/apt/lists/*
 
-#RUN apt-get update -y && \
-    #apt-get install -y tar && \
-    #rm -rf /var/lib/apt/lists/*
+# Crée le répertoire où PHP-FPM essaie d'écrire son PID file et donne la propriété à www-data
+RUN mkdir -p /run/php/ && chown -R www-data:www-data /run/php
 
 RUN wget -q -O /tmp/wordpress.tar.gz https://fr.wordpress.org/wordpress-6.8.3-fr_FR.tar.gz
 
@@ -43,4 +42,4 @@ RUN chmod u+x /usr/local/bin/setup.sh
 
 ENTRYPOINT ["/usr/local/bin/setup.sh"]
 #Php-fpm will stay in foreground (PID 1)
-CMD ["/usr/sbin/php-fpm7.4", "-F"]
+CMD ["php-fpm7.4", "-F"]
