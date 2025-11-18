@@ -1,4 +1,4 @@
-FROM debian:bullseye
+FROM debian:bookworm
 
 #installing mariadb and cleaning apt cache
 RUN apt-get update -y && apt-get install mariadb-server -y && \

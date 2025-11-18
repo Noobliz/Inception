@@ -4,10 +4,13 @@
 MYSQL_PASSWORD=$(< /run/secrets/db_user_password_file)
 MYSQL_ADMIN_PASSWORD=$(< /run/secrets/db_admin_password_file)
 
-
 # Chemin vers le dossier WordPress
 WP_PATH="/var/www/html/wordpress"
-
+chown -R www-data:www-data /var/www/html/wordpress
+if [ $? -ne 0 ]; then
+    echo "ERREUR: CHOWN a échoué. Problème de permissions ou chemin incorrect."
+    exit 1
+fi
 # Vérification conditionnelle : si le wp-config.php n'existe pas, on l'initialise
 if [ ! -f "$WP_PATH/wp-config.php" ]; then
     echo "--- Création du wp-config.php avec les variables d'environnement ---"

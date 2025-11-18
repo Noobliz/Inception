@@ -1,4 +1,4 @@
-FROM debian:bullseye
+FROM debian:bookworm
 
 #PHP-FPM is a intermediary between nginx and any request in php
 #nginx doesn't know how to execute php, so it will transfer the request
@@ -10,14 +10,14 @@ FROM debian:bullseye
 RUN apt-get update -y && apt-get install -y \
         wget \
         tar \
-        php7.4 \
-        php7.4-fpm \
-        php7.4-mysql \
-        php7.4-cli \
-        php7.4-curl \
-        php7.4-gd \
-        php7.4-mbstring \
-        php7.4-zip \
+        php \
+        php-fpm \
+        php-mysql \
+        php-cli \
+        php-curl \
+        php-gd \
+        php-mbstring \
+        php-zip \
     && rm -rf /var/lib/apt/lists/*
 
 # Crée le répertoire où PHP-FPM essaie d'écrire son PID file et donne la propriété à www-data
@@ -42,4 +42,4 @@ RUN chmod u+x /usr/local/bin/setup.sh
 
 ENTRYPOINT ["/usr/local/bin/setup.sh"]
 #Php-fpm will stay in foreground (PID 1)
-CMD ["php-fpm7.4", "-F"]
+CMD ["php-fpm8.2", "-F"]

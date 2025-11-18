@@ -1,4 +1,4 @@
-FROM debian:bullseye
+FROM debian:bookworm
 
 RUN apt update -y && apt install -y nginx openssl gettext\
     && rm -rf /var/lib/apt/lists/*
