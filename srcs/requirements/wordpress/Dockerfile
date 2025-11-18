@@ -35,7 +35,7 @@ RUN mkdir -p /var/www/html && \
 RUN chown -R www-data:www-data /var/www/html/wordpress && \
     rm /tmp/wordpress.tar.gz
 
-COPY ./conf/www.conf /etc/php/7.4/fpm/pool.d/www.conf
+COPY ./conf/www.conf /etc/php/8.2/fpm/pool.d/www.conf
 
 COPY setup.sh /usr/local/bin
 RUN chmod u+x /usr/local/bin/setup.sh

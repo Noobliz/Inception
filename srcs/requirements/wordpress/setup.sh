@@ -1,12 +1,25 @@
 #!/bin/bash
 
 ## Import secrets
-MYSQL_PASSWORD=$(< /run/secrets/db_user_password_file)
-MYSQL_ADMIN_PASSWORD=$(< /run/secrets/db_admin_password_file)
+MYSQL_PASSWORD=$(< /run/secrets/db_user_password_file | tr -d '\n')
+MYSQL_ADMIN_PASSWORD=$(< /run/secrets/db_admin_password_file | tr -d '\n')
 
+DB_HOST="mariadb"
+DB_PORT=3306
+
+echo "--- Démarrage de l'attente du service MariaDB ---"
+
+# Utilisation de /dev/tcp/ pour tester la connexion (méthode native Bash)
+until printf "" 2>/dev/null >/dev/tcp/$DB_HOST/$DB_PORT; do
+    echo "MariaDB n'est pas prêt ($DB_HOST:$DB_PORT). Attente de 1 seconde..."
+    sleep 1
+done
+
+echo "--- MariaDB est disponible. ---"
 # Chemin vers le dossier WordPress
 WP_PATH="/var/www/html/wordpress"
 chown -R www-data:www-data /var/www/html/wordpress
+
 if [ $? -ne 0 ]; then
     echo "ERREUR: CHOWN a échoué. Problème de permissions ou chemin incorrect."
     exit 1
@@ -41,7 +54,6 @@ if ( !defined('ABSPATH') )
 
 require_once(ABSPATH . 'wp-settings.php');
 EOF
-
     echo "--- Fichier wp-config.php créé ---"
 fi
 
