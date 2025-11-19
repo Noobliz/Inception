@@ -12,4 +12,4 @@ RUN chmod u+x /usr/local/bin/init.sh
 
 #define the entrypoint and the cmd that runs mariadb as PID 1 (and not daemon)
 ENTRYPOINT ["/usr/local/bin/init.sh"]
-CMD ["mysqld"]
+# CMD ["mysqld", "--user=mysql", "--datadir=/var/lib/mysql"]
